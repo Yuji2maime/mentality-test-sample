@@ -11,11 +11,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# カスタムCSS（統一されたクリーンな緑・赤系デザイン）
+# カスタムCSS（当日用：赤系デザインに修正）
 st.markdown("""
 <style>
     .day-banner {
-        background-color: #0F766E;
+        background-color: #8B0000;
         color: #FFFFFF !important;
         padding: 10px 18px;
         border-radius: 6px;
@@ -24,8 +24,8 @@ st.markdown("""
         margin-bottom: 20px;
     }
     .day-title {
-        color: #0F766E;
-        border-bottom: 3px solid #0F766E;
+        color: #8B0000;
+        border-bottom: 3px solid #8B0000;
         padding-bottom: 6px;
         margin-bottom: 15px;
         font-size: 1.6rem;
@@ -34,14 +34,14 @@ st.markdown("""
     .instruction-box {
         background-color: #f8f9fa;
         color: #212529 !important;
-        border-left: 5px solid #0F766E;
+        border-left: 5px solid #8B0000;
         padding: 15px;
         border-radius: 4px;
         margin-bottom: 20px;
         line-height: 1.6;
     }
     .instruction-box h4 {
-        color: #0F766E !important;
+        color: #8B0000 !important;
         margin-top: 0;
         margin-bottom: 10px;
         font-weight: bold;
@@ -51,7 +51,7 @@ st.markdown("""
         margin-bottom: 0;
     }
     div.stButton > button:first-child {
-        background-color: #0F766E;
+        background-color: #A52A2A;
         color: white !important;
         border-radius: 6px;
         border: none;
@@ -59,7 +59,7 @@ st.markdown("""
         padding: 8px 16px;
     }
     div.stButton > button:first-child:hover {
-        background-color: #115e59;
+        background-color: #8B0000;
         color: white !important;
     }
 </style>
@@ -292,8 +292,8 @@ else:
                         r=values + [values[0]],
                         theta=categories + [categories[0]],
                         fill='toself',
-                        fillcolor='rgba(15, 118, 110, 0.4)',
-                        line=dict(color='#0F766E', width=2)
+                        fillcolor='rgba(139, 0, 0, 0.4)',
+                        line=dict(color='#8B0000', width=2)
                     ))
                     fig.update_layout(
                         polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
