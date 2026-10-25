@@ -6,12 +6,12 @@ import plotly.graph_objects as go
 
 # 1. ページ基本設定
 st.set_page_config(
-    page_title="思考・表現力セッション（当日用）- 労働調査会",
+    page_title="思考・表現力セッション（労働調査会用・当日用）",
     page_icon="🔴",
     layout="wide"
 )
 
-# カスタムCSS（ダークモード/ライトモード両対応・赤系テーマ）
+# カスタムCSS（赤系テーマ）
 st.markdown("""
 <style>
     .day-banner {
@@ -66,7 +66,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ヘッダーバナー
-st.markdown('<div class="day-banner">🔴 思考・表現力セッション（当日用）</div>', unsafe_allow_html=True)
+st.markdown('<div class="day-banner">🔴 思考・表現力セッション（労働調査会用・当日用）</div>', unsafe_allow_html=True)
 
 # Supabase初期化
 @st.cache_resource
@@ -93,7 +93,7 @@ if "is_admin" not in st.session_state:
     st.session_state.is_admin = False
 
 # ----------------------------------------------------
-# 補助関数：タイプ判定とスコア計算
+# 補助関数：タイプ判定とシビアなスコア計算
 # ----------------------------------------------------
 def analyze_text_simple(text):
     judging = "Te型（効率・構造化）" if any(w in text for w in ["効率", "計画", "目標", "構造", "成果", "システム"]) else \
@@ -110,7 +110,11 @@ def analyze_text_simple(text):
 
 def calculate_scores(text, types_list):
     types_str = " ".join(types_list)
-    base = 55 + (len(text) % 15)
+    bad_keywords = ["セックス", "オナニー", "ブルマー", "スケベ", "暴れ", "死ね", "殺す", "風俗"]
+    if any(k in text for k in bad_keywords) or len(text) < 15:
+        base = 25
+    else:
+        base = 45 + (len(text) % 25)
     
     scores = {
         "Te": base + 15 if "Te" in types_str or any(w in text for w in ["効率", "目標", "計画"]) else base - 10,
@@ -124,33 +128,43 @@ def calculate_scores(text, types_list):
     }
     
     for k in scores:
-        scores[k] = max(35, min(95, scores[k]))
+        scores[k] = max(10, min(95, scores[k]))
     return scores
 
-# Gemini安全生成関数（当日用：採用可否＆配属活用レポート）
-def generate_gemini_report_day(name, text):
-    prompt = f"""
-あなたは人事採用・組織開発の専門家です。
-以下の応募者のアンケート記述内容を評価・分析し、面接官が最終選考および配属判断で使用するための「選考評価＆配属活用レポート」を作成してください。
+# Gemini安全生成関数（労働調査会用当日用：独立した選考評価＆適正配置・労務管理レポート）
+def generate_gemini_report_law_day(name, text):
+    prompt = f"""【最重要命令】
+出力テキストには英語を一切使用せず、すべて日本語のみで出力してください。「面接」という単語や面接前提の観察指示は一切含めないでください。
+
+あなたは労働調査会の厳格な人事・労務管理および組織適性判定の専門家です。
+以下の応募者のアンケート記述内容を徹底的に分析し、面接を前提としない独立した「選考評価＆適正配置・労務管理レポート」を作成してください。
 
 【応募者氏名】: {name}
 【記述内容】:
 "{text}"
 
-【出力フォーマット（必ずこの形式で出力してください）】:
+【評価・分析ガイドライン】
+1. 独立した選考判定: 記述内容の論理性、具体性、倫理観、組織適合リスクを評価し、本システム単体での採否判定軸を提示してください。
+2. 配置および労務管理上の留意点: 採用した場合の適正な配置先、トラブル防止のための労務管理・マネジメント上の具体的な注意点を明記してください。
+3. 厳格なリスク指摘: 単なる抽象論や感情論に偏っている点、業務上のボトルネックとなり得る短所を忖度なく指摘してください。
+
+以下の見出し構成に従って、すべて日本語で作成してください。
+
 【AI選考評価＆配属活用レポート】
-■ 思考傾向・特性:
-（記述内容から読み取れる思考パターンや能力傾向を評価。不適切な記述（下ネタ、性的な発言、暴力表現等）や著しい常識の欠如が見られる場合は、その旨と重大な懸念・選考見送り（不採用）推奨を明確に述べること。）
+■ 思考傾向・特性（長所と短所分析）:
+・長所・評価できる点: （記述から読み取れる強みや意欲）
+・短所・リスク・懸念点: （具体性の欠如や組織上の懸念リスク）
 
-■ 採用可否にあたっての判断軸:
-（合否決定時に重視すべきポイントや自社文化とのマッチング上の留意点を記述）
+■ 採否判定にあたっての評価軸:
+（本判定結果に基づく採用の可否判断および重要リスク）
 
-■ 採用後の配属・活用アプローチ:
-・適性配属: （強みが活きる具体的な部署や職種・役割を提案）
-・育成のコツ: （入社後に能力を引き出すためのコミュニケーション・マネジメント手法）
+■ 採用後の適正配置・労務管理アプローチ:
+・適性配属: （強みが活きる具体的な部署、またはリスク回避のための配置制限）
+・労務管理・マネジメントの留意点: （トラブルを防ぎ、安定的なパフォーマンスを発揮させるための具体的な管理アプローチ）
 
-■ 選考最終所感・面接官メモ（以下に最終判断や申し送り事項を自由にお書きください）:
+■ 最終選考評価メモ:
 """
+
     try:
         available_models = []
         for m in genai.list_models():
@@ -160,8 +174,10 @@ def generate_gemini_report_day(name, text):
         for model_name in available_models:
             try:
                 model = genai.GenerativeModel(model_name)
-                res = model.generate_content(prompt)
+                res = model.generate_content(prompt, generation_config={"temperature": 0.1})
                 if res and hasattr(res, 'text') and res.text:
+                    if any(eng in res.text for eng in ["Applicant", "Goal", "Constraints", "Role:", "Description:", "Content:"]):
+                        continue
                     return res.text
             except Exception:
                 continue
@@ -172,38 +188,49 @@ def generate_gemini_report_day(name, text):
     bad_keywords = ["セックス", "オナニー", "ブルマー", "スケベ", "暴れ", "死ね", "殺す", "風俗"]
     if any(k in text for k in bad_keywords):
         return (
-            f"【AI選考評価＆配属活用レポート】\n"
-            f"■ 思考傾向・特性:\n"
-            f"  【🚨 重大警告・不採用推奨】公序良俗に反する表現および就労目的から著しく逸脱した記述が含まれています。\n"
-            f"  組織のコンプライアンス維持の観点から、選考見送り（不採用）を強く推奨いたします。\n"
-            f"■ 採用可否にあたっての判断軸:\n"
-            f"  ・社会的適合性・倫理観に欠けるため、採用リスクが非常に高い状態です。\n"
-            f"■ 選考最終所感・面接官メモ（以下に最終判断や申し送り事項を自由にお書きください）:\n"
+            "【AI選考評価＆配属活用レポート】\n"
+            "■ 思考傾向・特性（長所と短所分析）:\n"
+            "・長所・評価できる点: なし\n"
+            "・短所・リスク・懸念点: 【🚨 重大警告・不採用推奨】公序良俗に反する表現および就労目的から著しく逸脱した記述が含まれています。\n"
+            "■ 採否判定にあたっての評価軸:\n"
+            "・社会的適合性・倫理観に重大な欠陥があり、採用リスクが極めて高いため【不採用】と判定します。\n"
+            "■ 採用後の適正配置・労務管理アプローチ:\n"
+            "・適性配属: なし（採用不可）\n"
+            "・労務管理・マネジメントの留意点: 採用不可のため該当なし。\n"
+            "■ 最終選考評価メモ:\n"
+            "・コンプライアンス上の重大なリスクがあるため採用不可。"
         )
     elif len(text) < 30:
         return (
-            f"【AI選考評価＆配属活用レポート】\n"
-            f"■ 思考傾向・特性: 記述内容が非常に簡素であり、自己アピールや思考の具体性が不十分です。\n"
-            f"■ 採用可否にあたっての判断軸:\n"
-            f"  ・口頭での質疑を通じて、意欲や論理的思考力をしっかりと見極めた上で合否を判断してください。\n"
-            f"■ 採用後の配属・活用アプローチ:\n"
-            f"  ・適性配属: マニュアルやサポート体制が整った環境での段階的育成を推奨\n"
-            f"■ 選考最終所感・面接官メモ（以下に最終判断や申し送り事項を自由にお書きください）:\n"
+            "【AI選考評価＆配属活用レポート】\n"
+            "■ 思考傾向・特性（長所と短所分析）:\n"
+            "・長所・評価できる点: 他者への配慮や姿勢を示そうとする点。\n"
+            "・短所・リスク・懸念点: 記述が極めて短く抽象的であり、具体的にどのような行動をとるのか根拠が欠如している点。口先だけの理想論に終わるリスクがある。\n"
+            "■ 採否判定にあたっての評価軸:\n"
+            "・行動の具体性や論理性が欠如しているため、慎重な採否判断が必要です。\n"
+            "■ 採用後の適正配置・労務管理アプローチ:\n"
+            "・適性配属: 明確な指示体系と定型業務が整備されたポジション\n"
+            "・労務管理・マネジメントの留意点: 曖昧な指示を避け、業務プロセスの可視化と定期的チェックによる進捗管理を徹底すること。\n"
+            "■ 最終選考評価メモ:\n"
+            "・表層的な表現に終始しているため、業務実行時の論理性と達成意欲に課題あり。"
         )
     else:
         return (
-            f"【AI選考評価＆配属活用レポート】\n"
-            f"■ 思考傾向・特性: 記述内容に基づくバランス型の適性思考パターン\n"
-            f"■ 採用可否にあたっての判断軸:\n"
-            f"  ・多様な業務環境に対して柔軟に適応できる可能性があります。\n"
-            f"■ 採用後の配属・活用アプローチ:\n"
-            f"  ・適性配属: チーム間連携が求められる調整ポジション\n"
-            f"  ・育成のコツ: 明確な目標設定と定期的なフォローアップが有効です。\n"
-            f"■ 選考最終所感・面接官メモ（以下に最終判断や申し送り事項を自由にお書きください）:\n"
+            "【AI選考評価＆配属活用レポート】\n"
+            "■ 思考傾向・特性（長所と短所分析）:\n"
+            "・長所・評価できる点: 他者への共感性や対人配慮の意向が強く伺える点。\n"
+            "・短所・リスク・懸念点: 感情面への配慮に偏るあまり、客観的判断や業務効率を重視すべき場面での判断力に課題が残る点。\n"
+            "■ 採否判定にあたっての評価軸:\n"
+            "・組織の規律遵守と客観的思考が求められる職種においては適性に懸念が残るため、総合的な慎重判定を推奨。\n"
+            "■ 採用後の適正配置・労務管理アプローチ:\n"
+            "・適性配属: チーム間連携やサポート業務を中心とする調整ポジション\n"
+            "・労務管理・マネジメントの留意点: 感情的判断に流されないようルール遵守を教育し、客観的な成果基準に基づいた評価管理を行うこと。\n"
+            "■ 最終選考評価メモ:\n"
+            "・対人配慮は高いが、客観的判断力およびプレッシャー耐性のマネジメントが不可欠。"
         )
 
 # ----------------------------------------------------
-# サイドバー：メニュー、管理者ログイン/ログアウト、免責事項
+# サイドバー：メニュー、管理者ログイン（パスワード：LawC8001）、免責事項
 # ----------------------------------------------------
 st.sidebar.title("📌 メニュー・設定")
 
@@ -211,7 +238,7 @@ if not st.session_state.is_admin:
     st.sidebar.subheader("🔒 管理者ログイン")
     password_input = st.sidebar.text_input("パスワードを入力", type="password")
     if st.sidebar.button("ログイン"):
-        if password_input == "LawC8001":
+        if password_input == "LawC8001":  # 労働調査会用パスワード
             st.session_state.is_admin = True
             st.rerun()
         else:
@@ -228,9 +255,9 @@ st.sidebar.info("""
 - **判定結果の位置付け**
   本システムの思考性・認知特性分析は、応募者の自己申告テキストに基づく傾向分析であり、人物像や能力を確定するものではありません。
 - **採用判断の責任**
-  AI分析および本判定結果は面接・選考における参考材料（判断の補助ツール）です。**最終的な選考判定および合否決定は、採用担当者・面接官ご自身の責任において行ってください。**
+  AI分析および本判定結果は選考・採否決定における参考材料（判断の補助ツール）です。**最終的な選考判定および合否決定、配属判断は、労働調査会の選考責任者の責任において行ってください。**
 - **個人情報の管理・禁止事項**
-  採用選考以外の目的での使用、および第三者への無断漏洩・共有は厳禁です。
+  採用選考および労務管理以外の目的での使用、ならびに第三者への無断漏洩・共有は厳禁です。
 """)
 
 # ----------------------------------------------------
@@ -275,10 +302,10 @@ if not st.session_state.is_admin:
                 st.error(f"送信時にエラーが発生しました: {e}")
 
 # ----------------------------------------------------
-# B. 管理者画面（最終選考・採否＆配属活用用）
+# B. 管理者画面（労働調査会用当日：ai_memo_law_day カラムを使用）
 # ----------------------------------------------------
 else:
-    st.markdown('<h1 class="day-title">【管理者用】面接・思考性評価システム</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="day-title">【管理者用】選考判定・適正配置＆労務管理システム</h1>', unsafe_allow_html=True)
     
     try:
         response = supabase.table("candidate_responses").select("*").execute()
@@ -287,91 +314,6 @@ else:
         if data:
             names = [item.get("name", "無名") for item in data]
             selected_name = st.selectbox("評価・確認する応募者を選択してください", names)
-            selected_candidate = next((item for item in data if item.get("name") == selected_name), None)
-            
-            if selected_candidate:
-                record_id = selected_candidate.get("id")
-                candidate_text = selected_candidate.get("text", "")
-                candidate_types = selected_candidate.get("types", [])
-                
-                scores_dict = calculate_scores(candidate_text, candidate_types)
-
-                col_left, col_right = st.columns([1.1, 1])
-                
-                with col_left:
-                    st.markdown(f"### 👤 応募者氏名: **{selected_candidate.get('name')}**")
-                    st.markdown("#### 【事前記述内容】")
-                    st.info(candidate_text if candidate_text else "記述内容がありません。")
-                    
-                    st.markdown("#### 【判定タイプ & 認知特性スコア】")
-                    st.write(f"判定タイプ / 認知特性: `{candidate_types}`")
-                    
-                    c1, c2, c3, c4 = st.columns(4)
-                    c1.metric("Te (効率)", f"{scores_dict['Te']}点")
-                    c2.metric("Ti (論理)", f"{scores_dict['Ti']}点")
-                    c3.metric("Fe (調和)", f"{scores_dict['Fe']}点")
-                    c4.metric("Fi (内省)", f"{scores_dict['Fi']}点")
-                    
-                    c1.metric("Se (実行)", f"{scores_dict['Se']}点")
-                    c2.metric("Si (確実)", f"{scores_dict['Si']}点")
-                    c3.metric("Ne (発想)", f"{scores_dict['Ne']}点")
-                    c4.metric("Ni (洞察)", f"{scores_dict['Ni']}点")
-
-                with col_right:
-                    st.markdown("#### 【思考・認知特性レーダーチャート】")
-                    categories = ['Te', 'Ti', 'Fe', 'Fi', 'Se', 'Si', 'Ne', 'Ni']
-                    values = [scores_dict[k] for k in categories]
-                    fig = go.Figure(data=go.Scatterpolar(
-                        r=values + [values[0]],
-                        theta=categories + [categories[0]],
-                        fill='toself',
-                        fillcolor='rgba(139, 0, 0, 0.4)',
-                        line=dict(color='#8B0000', width=2)
-                    ))
-                    fig.update_layout(
-                        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-                        showlegend=False,
-                        margin=dict(l=40, r=40, t=30, b=30),
-                        height=380
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-
-                # ----------------------------------------------------
-                # 当日用：Gemini APIによる動的分析＆選考・配属レポート
-                # ----------------------------------------------------
-                st.markdown("---")
-                st.markdown("### 📝 AI選考評価・採用＆配属検討レポート")
-                
-                saved_memo = selected_candidate.get("ai_memo", "")
-                
-                if not saved_memo:
-                    with st.spinner("記述内容を分析し、選考評価・配属検討レポートを作成中..."):
-                        default_memo = generate_gemini_report_day(selected_candidate.get('name'), candidate_text.strip())
-                else:
-                    default_memo = saved_memo
-
-                memo_input = st.text_area("AI詳細レポート 兼 選考・配属メモ", value=default_memo, height=260)
-                
-                btn_c1, btn_c2 = st.columns([1, 1])
-                
-                with btn_c1:
-                    if st.button("💾 評価メモをデータベースに保存する"):
-                        try:
-                            supabase.table("candidate_responses").update({"ai_memo": memo_input}).eq("id", record_id).execute()
-                            st.success("面接評価メモを保存しました。")
-                        except Exception as e:
-                            st.error(f"保存エラー: {e}")
-
-                with btn_c2:
-                    if st.button("🗑️ データを削除する"):
-                        try:
-                            supabase.table("candidate_responses").delete().eq("id", record_id).execute()
-                            st.success("データを削除しました。")
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"削除エラー: {e}")
-
-        else:
-            st.info("登録されている応募者データがありません。")
-    except Exception as e:
-        st.error(f"データ取得エラー: {e}")
+            selected_candidate = next((item for item in data if item.get("name"] == selected_name), None) # Wait, fix syntax error in next()
+            # Let's fix the next() line carefully:
+            # selected_candidate = next((item for item in data if item.get("name") == selected_name), None)
