@@ -314,6 +314,97 @@ else:
         if data:
             names = [item.get("name", "無名") for item in data]
             selected_name = st.selectbox("評価・確認する応募者を選択してください", names)
-            selected_candidate = next((item for item in data if item.get("name"] == selected_name), None) # Wait, fix syntax error in next()
-            # Let's fix the next() line carefully:
-            # selected_candidate = next((item for item in data if item.get("name") == selected_name), None)
+            selected_candidate = next((item for item in data if item.get("name") == selected_name), None)
+            
+            if selected_candidate:
+                record_id = selected_candidate.get("id")
+                candidate_text = selected_candidate.get("text", "")
+                candidate_types = selected_candidate.get("types", [])
+                
+                scores_dict = calculate_scores(candidate_text, candidate_types)
+
+                col_left, col_right = st.columns([1.1, 1])
+                
+                with col_left:
+                    st.markdown(f"### 👤 応募者氏名: **{selected_candidate.get('name')}**")
+                    st.markdown("#### 【事前記述内容】")
+                    st.info(candidate_text if candidate_text else "記述内容がありません。")
+                    
+                    st.markdown("#### 【判定タイプ & 認知特性スコア】")
+                    st.write(f"判定タイプ / 認知特性: `{candidate_types}`")
+                    
+                    c1, c2, c3, c4 = st.columns(4)
+                    c1.metric("Te (効率)", f"{scores_dict['Te']}点")
+                    c2.metric("Ti (論理)", f"{scores_dict['Ti']}点")
+                    c3.metric("Fe (調和)", f"{scores_dict['Fe']}点")
+                    c4.metric("Fi (内省)", f"{scores_dict['Fi']}点")
+                    
+                    c1.metric("Se (実行)", f"{scores_dict['Se']}点")
+                    c2.metric("Si (確実)", f"{scores_dict['Si']}点")
+                    c3.metric("Ne (発想)", f"{scores_dict['Ne']}点")
+                    c4.metric("Ni (洞察)", f"{scores_dict['Ni']}点")
+
+                with col_right:
+                    st.markdown("#### 【思考・認知特性レーダーチャート】")
+                    categories = ['Te', 'Ti', 'Fe', 'Fi', 'Se', 'Si', 'Ne', 'Ni']
+                    values = [scores_dict[k] for k in categories]
+                    fig = go.Figure(data=go.Scatterpolar(
+                        r=values + [values[0]],
+                        theta=categories + [categories[0]],
+                        fill='toself',
+                        fillcolor='rgba(139, 0, 0, 0.4)',
+                        line=dict(color='#8B0000', width=2)
+                    ))
+                    fig.update_layout(
+                        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                        showlegend=False,
+                        margin=dict(l=40, r=40, t=30, b=30),
+                        height=380
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+
+                # ----------------------------------------------------
+                # 労働調査会用当日：ai_memo_law_day カラムを使用（他社データ混在防止）
+                # ----------------------------------------------------
+                st.markdown("---")
+                st.markdown("### 📝 AI選考評価・採否＆適性配置・労務管理レポート")
+                
+                saved_memo = selected_candidate.get("ai_memo_law_day", "")
+                
+                is_invalid_english = any(eng in str(saved_memo) for eng in ["Applicant", "Goal", "Constraints", "Role:", "Description:", "Content:"])
+                
+                if not saved_memo or is_invalid_english:
+                    with st.spinner("労働調査会用当日レポートを作成中..."):
+                        default_memo = generate_gemini_report_law_day(selected_candidate.get('name'), candidate_text.strip())
+                        try:
+                            supabase.table("candidate_responses").update({"ai_memo_law_day": default_memo}).eq("id", record_id).execute()
+                        except Exception:
+                            pass
+                else:
+                    default_memo = saved_memo
+
+                memo_input = st.text_area("AI詳細レポート 兼 選考・配属・労務メモ", value=default_memo, height=260)
+                
+                btn_c1, btn_c2 = st.columns([1, 1])
+                
+                with btn_c1:
+                    if st.button("💾 評価メモをデータベースに保存する"):
+                        try:
+                            supabase.table("candidate_responses").update({"ai_memo_law_day": memo_input}).eq("id", record_id).execute()
+                            st.success("評価・労務メモを保存しました。")
+                        except Exception as e:
+                            st.error(f"保存エラー: {e}")
+
+                with btn_c2:
+                    if st.button("🗑️ データを削除する"):
+                        try:
+                            supabase.table("candidate_responses").delete().eq("id", record_id).execute()
+                            st.success("データを削除しました。")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"削除エラー: {e}")
+
+        else:
+            st.info("登録されている応募者データがありません。")
+    except Exception as e:
+        st.error(f"データ取得エラー: {e}")
