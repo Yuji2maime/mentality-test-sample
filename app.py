@@ -93,7 +93,7 @@ if "is_admin" not in st.session_state:
     st.session_state.is_admin = False
 
 # ----------------------------------------------------
-# 補助関数：タイプ判定とシビアなスコア計算
+# 補助関数：タイプ判定とスコア計算
 # ----------------------------------------------------
 def analyze_text_simple(text):
     judging = "Te型（効率・構造化）" if any(w in text for w in ["効率", "計画", "目標", "構造", "成果", "システム"]) else \
@@ -131,60 +131,8 @@ def calculate_scores(text, types_list):
         scores[k] = max(10, min(95, scores[k]))
     return scores
 
-# Gemini安全生成関数（労働調査会用当日用：独立した選考評価＆適正配置・労務管理レポート）
-def generate_gemini_report_law_day(name, text):
-    prompt = f"""【最重要命令】
-出力テキストには英語を一切使用せず、すべて日本語のみで出力してください。「面接」という単語や面接前提の観察指示は一切含めないでください。
-
-あなたは労働調査会の厳格な人事・労務管理および組織適性判定の専門家です。
-以下の応募者のアンケート記述内容を徹底的に分析し、面接を前提としない独立した「選考評価＆適正配置・労務管理レポート」を作成してください。
-
-【応募者氏名】: {name}
-【記述内容】:
-"{text}"
-
-【評価・分析ガイドライン】
-1. 独立した選考判定: 記述内容の論理性、具体性、倫理観、組織適合リスクを評価し、本システム単体での採否判定軸を提示してください。
-2. 配置および労務管理上の留意点: 採用した場合の適正な配置先、トラブル防止のための労務管理・マネジメント上の具体的な注意点を明記してください。
-3. 厳格なリスク指摘: 単なる抽象論や感情論に偏っている点、業務上のボトルネックとなり得る短所を忖度なく指摘してください。
-
-以下の見出し構成に従って、すべて日本語で作成してください。
-
-【AI選考評価＆配属活用レポート】
-■ 思考傾向・特性（長所と短所分析）:
-・長所・評価できる点: （記述から読み取れる強みや意欲）
-・短所・リスク・懸念点: （具体性の欠如や組織上の懸念リスク）
-
-■ 採否判定にあたっての評価軸:
-（本判定結果に基づく採用の可否判断および重要リスク）
-
-■ 採用後の適正配置・労務管理アプローチ:
-・適性配属: （強みが活きる具体的な部署、またはリスク回避のための配置制限）
-・労務管理・マネジメントの留意点: （トラブルを防ぎ、安定的なパフォーマンスを発揮させるための具体的な管理アプローチ）
-
-■ 最終選考評価メモ:
-"""
-
-    try:
-        available_models = []
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                available_models.append(m.name)
-        
-        for model_name in available_models:
-            try:
-                model = genai.GenerativeModel(model_name)
-                res = model.generate_content(prompt, generation_config={"temperature": 0.1})
-                if res and hasattr(res, 'text') and res.text:
-                    if any(eng in res.text for eng in ["Applicant", "Goal", "Constraints", "Role:", "Description:", "Content:"]):
-                        continue
-                    return res.text
-            except Exception:
-                continue
-    except Exception:
-        pass
-
-    # フォールバックエンジン
+# 即時表示用の標準テンプレート（AIを使わず瞬時に表示）
+def get_default_law_report(text):
     bad_keywords = ["セックス", "オナニー", "ブルマー", "スケベ", "暴れ", "死ね", "殺す", "風俗"]
     if any(k in text for k in bad_keywords):
         return (
@@ -238,7 +186,7 @@ if not st.session_state.is_admin:
     st.sidebar.subheader("🔒 管理者ログイン")
     password_input = st.sidebar.text_input("パスワードを入力", type="password")
     if st.sidebar.button("ログイン"):
-        if password_input == "LawC8001":  # 労働調査会用パスワード
+        if password_input == "LawC8001":
             st.session_state.is_admin = True
             st.rerun()
         else:
@@ -286,23 +234,19 @@ if not st.session_state.is_admin:
         else:
             try:
                 types_val = analyze_text_simple(applicant_text.strip())
-                
                 new_data = {
                     "name": applicant_name.strip(),
                     "text": applicant_text.strip(),
                     "types": types_val,
                     "app_type": "day"
                 }
-                
                 supabase.table("candidate_responses").insert(new_data).execute()
-                
                 st.success("提出が完了いたしました。ご協力ありがとうございました！")
-                st.info("※入力内容は正常に送信されました。この画面を閉じていただいて構いません。")
             except Exception as e:
                 st.error(f"送信時にエラーが発生しました: {e}")
 
 # ----------------------------------------------------
-# B. 管理者画面（労働調査会用当日：ai_memo_law_day カラムを使用）
+# B. 管理者画面（高速化・即時表示版）
 # ----------------------------------------------------
 else:
     st.markdown('<h1 class="day-title">【管理者用】選考判定・適正配置＆労務管理システム</h1>', unsafe_allow_html=True)
@@ -364,22 +308,20 @@ else:
                     st.plotly_chart(fig, use_container_width=True)
 
                 # ----------------------------------------------------
-                # 労働調査会用当日：ai_memo_law_day カラムを使用（他社データ混在防止）
+                # レポート表示（待たずに即時表示＆独立カラム ai_memo_law_day 使用）
                 # ----------------------------------------------------
                 st.markdown("---")
                 st.markdown("### 📝 AI選考評価・採否＆適性配置・労務管理レポート")
                 
                 saved_memo = selected_candidate.get("ai_memo_law_day", "")
                 
-                is_invalid_english = any(eng in str(saved_memo) for eng in ["Applicant", "Goal", "Constraints", "Role:", "Description:", "Content:"])
-                
-                if not saved_memo or is_invalid_english:
-                    with st.spinner("労働調査会用当日レポートを作成中..."):
-                        default_memo = generate_gemini_report_law_day(selected_candidate.get('name'), candidate_text.strip())
-                        try:
-                            supabase.table("candidate_responses").update({"ai_memo_law_day": default_memo}).eq("id", record_id).execute()
-                        except Exception:
-                            pass
+                # まだ保存されていない場合は、待たずにデフォルト文章を即座にセット
+                if not saved_memo or "AI面接事前準備レポート" in str(saved_memo):
+                    default_memo = get_default_law_report(candidate_text.strip())
+                    try:
+                        supabase.table("candidate_responses").update({"ai_memo_law_day": default_memo}).eq("id", record_id).execute()
+                    except Exception:
+                        pass
                 else:
                     default_memo = saved_memo
 
