@@ -41,7 +41,7 @@ def init_supabase():
 
 supabase = init_supabase()
 
-# Gemini API設定（最新の安定モデルを指定）
+# Gemini API設定
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 # --- サイドバー：モード切り替え（受検者用 ⇔ 管理画面） ---
@@ -128,8 +128,8 @@ if app_mode == "受検者用：応募フォーム":
                     [推奨される職種]
                     """
                     
-                    # 現在確実に動作する標準モデルを指定
-                    model = genai.GenerativeModel("gemini-pro")
+                    # 現在確実に安定して動作する最新モデル（gemini-1.5-flash または gemini-2.5 等）を指定
+                    model = genai.GenerativeModel("gemini-1.5-flash")
                     response = model.generate_content(prompt)
                     ai_text = response.text
                     
