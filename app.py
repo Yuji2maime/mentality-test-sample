@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# 視認性とトーンを整えるカスタムCSS（当日用：赤系基調）
+# 視認性とトーンを整えるカスタムCSS（当日用：赤系基調・画像と完全同一のレイアウト構造）
 st.markdown("""
 <style>
     .top-header {
@@ -22,6 +22,15 @@ st.markdown("""
         font-weight: bold;
         margin-bottom: 25px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .disclaimer-sidebar {
+        background-color: #fff5f5;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #feb2b2;
+        font-size: 12px;
+        color: #742a2a;
+        line-height: 1.4;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -43,23 +52,23 @@ try:
 except Exception:
     AI_AVAILABLE = False
 
-# サイドバー：前日用と完全に同一の構成（ログインボタン追加、フッター削除）
+# サイドバー：前日用と完全に同一の構造・配置
 st.sidebar.markdown("### メニュー・設定")
 st.sidebar.markdown("---")
 
 st.sidebar.markdown("### 管理者ログイン")
 admin_pass = st.sidebar.text_input("パスワードを入力", type="password")
 
-# ログインボタンを追加
+# パスワード入力欄の下にログインボタンを配置
 login_btn = st.sidebar.button("ログイン")
-is_admin = (login_pass == "8888" and login_btn) or (admin_pass == "8888")
+is_admin = (admin_pass == "8888" and login_btn) or (admin_pass == "8888")
 
 st.sidebar.markdown("---")
 
-# 注意事項・禁止事項・免責事項（前日用と同じボックススタイル）
+# 注意事項・禁止事項・免責事項（画像と同一のボックス配置）
 st.sidebar.markdown("#### 注意事項・禁止事項・免責事項")
 st.sidebar.markdown("""
-<div style="background-color: #ebf8ff; padding: 12px; border-radius: 6px; border: 1px solid #bee3f8; font-size: 12px; color: #2b6cb0; line-height: 1.4;">
+<div class="disclaimer-sidebar">
     <strong>判定結果の位置付け</strong><br>
     本システムの分析は当日傾向分析であり、人物像を確定するものではありません。<br><br>
     <strong>面接準備の補助ツール</strong><br>
