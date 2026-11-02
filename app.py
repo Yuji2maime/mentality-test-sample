@@ -43,28 +43,29 @@ try:
 except Exception:
     AI_AVAILABLE = False
 
-# サイドバー：前日用と完全に同一の構成（左側に注意事項を配置）
+# サイドバー：前日用と完全に同一の構成（ログインボタン追加、フッター削除）
 st.sidebar.markdown("### メニュー・設定")
 st.sidebar.markdown("---")
 
 st.sidebar.markdown("### 管理者ログイン")
 admin_pass = st.sidebar.text_input("パスワードを入力", type="password")
-is_admin = (admin_pass == "8888")
+
+# ログインボタンを追加
+login_btn = st.sidebar.button("ログイン")
+is_admin = (login_pass == "8888" and login_btn) or (admin_pass == "8888")
 
 st.sidebar.markdown("---")
 
-# 注意事項・禁止事項・免責事項（前日用と同じくサイドバーに配置）
-st.sidebar.markdown("#### ⚠️ 注意事項・禁止事項・免責事項")
-st.sidebar.markdown(
-    "<div style='font-size: 12px; line-height: 1.5; color: #4a5568;'>"
-    "1. <strong>判定結果の位置付け:</strong> 本システムの分析は当日傾向分析であり、人物像を確定するものではありません。<br><br>"
-    "2. <strong>面接準備の補助ツール:</strong> 最終的な選考判定および合否決定の責任は選考責任者に帰属します。"
-    "</div>",
-    unsafe_allow_html=True
-)
-
-st.sidebar.markdown("---")
-st.sidebar.info("© 横山社会保険労務士事務所\n思考・表現力セッション（当日用）")
+# 注意事項・禁止事項・免責事項（前日用と同じボックススタイル）
+st.sidebar.markdown("#### 注意事項・禁止事項・免責事項")
+st.sidebar.markdown("""
+<div style="background-color: #ebf8ff; padding: 12px; border-radius: 6px; border: 1px solid #bee3f8; font-size: 12px; color: #2b6cb0; line-height: 1.4;">
+    <strong>判定結果の位置付け</strong><br>
+    本システムの分析は当日傾向分析であり、人物像を確定するものではありません。<br><br>
+    <strong>面接準備の補助ツール</strong><br>
+    最終的な選考判定および合否決定の責任は選考責任者に帰属します。
+</div>
+""", unsafe_allow_html=True)
 
 # メイン画面の切り替え
 if not is_admin:
