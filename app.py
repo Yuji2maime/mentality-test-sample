@@ -10,14 +10,14 @@ st.set_page_config(
     layout="wide"
 )
 
-# 視認性とトーンを整えるカスタムCSS（当日用：赤系のアクセントカラー）
+# 視認性とトーンを整えるカスタムCSS（前日用と同一のプロフェッショナルな配色）
 st.markdown("""
 <style>
     .main-header {
-        background-color: #fff5f5;
+        background-color: #f0f4f8;
         padding: 20px;
         border-radius: 10px;
-        border-left: 5px solid #e53e3e;
+        border-left: 5px solid #2b6cb0;
         margin-bottom: 20px;
     }
     .disclaimer-box {
@@ -62,7 +62,7 @@ if not is_admin:
     st.markdown("""
     <div class="main-header">
         <h2>【当日セッションのご案内】</h2>
-        <p>本アンケートは、本日のセッション・面接をより実りあるものにするため、皆様の日常的なお考えや仕事観をお伺いするものです。正解・不正解はございませんので、リラックスしてご自身の率直なご意見をご回答ください。</p>
+        <p>本アンケートは、本日のセッション・面接をより実りあるものにするため、事前に皆様の日常的なお考えや仕事観をお伺いするものです。正解・不正解はございませんので、リラックスしてご自身の率直なご意見をご回答ください。</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -84,7 +84,7 @@ if not is_admin:
             height=150
         )
         
-        submitted = st.form_submit_button("回答を提出する")
+        submitted = st.form_submit_button("当日回答を提出する")
 
     if submitted:
         if not name or not content:
@@ -120,15 +120,15 @@ if not is_admin:
                     
                     if supabase:
                         supabase.table("mentality_applicants_matsuyama").insert(data).execute()
-                        st.success("回答を受け付けました。ご協力ありがとうございました。")
+                        st.success("当日回答を受け付けました。ご協力ありがとうございました。")
                         st.balloons()
                     else:
-                        st.success("（デモモード）回答を受け付けました。")
+                        st.success("（デモモード）当日回答を受け付けました。")
                 except Exception as e:
                     st.error(f"保存エラー: {e}")
 
 else:
-    # --- 管理者用画面（当日用） ---
+    # --- 管理者用画面（当日用：前日用と同一レイアウト） ---
     st.markdown("""
     <div class="main-header">
         <h2>【管理者用】 当日セッション・面接深掘りガイド</h2>
@@ -136,7 +136,7 @@ else:
     </div>
     """, unsafe_allow_html=True)
     
-    st.success("管理者としてログイン中（パスワード「8888」認証成功）")
+    st.success("管理者としてログイン中（パスワード認証成功）")
 
     if supabase:
         try:
@@ -149,7 +149,7 @@ else:
                 if selected_name:
                     row = df[df["name"] == selected_name].iloc[0]
                     st.markdown(f"### 👤 応募者氏名: {row['name']}")
-                    st.markdown(f"**【記述内容】**")
+                    st.markdown(f"**【当日記述内容】**")
                     st.info(row['content'])
                     
                     st.markdown(f"**【判定タイプ＆認知特性スコア】**")
