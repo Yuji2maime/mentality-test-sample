@@ -10,11 +10,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# 視認性とトーンを整えるカスタムCSS（当日用：赤系アクセント）
+# 視認性とトーンを整えるカスタムCSS（当日用：赤系基調）
 st.markdown("""
 <style>
     .top-header {
-        background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+        background: linear-gradient(135deg, #9b2c2c 0%, #e53e3e 100%);
         color: white;
         padding: 18px 24px;
         border-radius: 8px;
@@ -22,22 +22,6 @@ st.markdown("""
         font-weight: bold;
         margin-bottom: 25px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .sub-header {
-        background-color: #fff5f5;
-        padding: 15px 20px;
-        border-radius: 8px;
-        border-left: 5px solid #c53030;
-        margin-bottom: 20px;
-    }
-    .disclaimer-box {
-        background-color: #f7fafc;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        font-size: 13px;
-        color: #4a5568;
-        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -59,27 +43,40 @@ try:
 except Exception:
     AI_AVAILABLE = False
 
-# サイドバー：前日用と完全に同一のレイアウト（「メニュー・設定」「管理者ログイン」）
-st.sidebar.markdown("### 📌 メニュー・設定")
+# サイドバー：前日用と完全に同一の構成（左側に注意事項を配置）
+st.sidebar.markdown("### メニュー・設定")
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🔒 管理者ログイン")
+
+st.sidebar.markdown("### 管理者ログイン")
 admin_pass = st.sidebar.text_input("パスワードを入力", type="password")
 is_admin = (admin_pass == "8888")
+
+st.sidebar.markdown("---")
+
+# 注意事項・禁止事項・免責事項（前日用と同じくサイドバーに配置）
+st.sidebar.markdown("#### ⚠️ 注意事項・禁止事項・免責事項")
+st.sidebar.markdown(
+    "<div style='font-size: 12px; line-height: 1.5; color: #4a5568;'>"
+    "1. <strong>判定結果の位置付け:</strong> 本システムの分析は当日傾向分析であり、人物像を確定するものではありません。<br><br>"
+    "2. <strong>面接準備の補助ツール:</strong> 最終的な選考判定および合否決定の責任は選考責任者に帰属します。"
+    "</div>",
+    unsafe_allow_html=True
+)
 
 st.sidebar.markdown("---")
 st.sidebar.info("© 横山社会保険労務士事務所\n思考・表現力セッション（当日用）")
 
 # メイン画面の切り替え
 if not is_admin:
-    # --- 受検者用フォーム（前日用と同一レイアウト・当日用文言） ---
-    st.markdown('<div class="top-header">🟢 思考・表現力セッション（当日受検）</div>', unsafe_allow_html=True)
+    # --- 受検者用フォーム ---
+    st.markdown('<div class="top-header">🔴 思考・表現力セッション</div>', unsafe_allow_html=True)
     
     st.markdown("### 当日アンケート入力フォーム")
 
     st.markdown("""
-    <div class="sub-header">
+    <div style="background-color: #fff5f5; padding: 15px 20px; border-radius: 8px; border-left: 5px solid #e53e3e; margin-bottom: 20px;">
         <strong>【当日セッションのご案内】</strong><br>
-        本アンケートは、本日のセッション・面接をより実りあるものにするため、皆様の日常的なお考えや仕事観をお伺いするものです。正解・不正解はございませんので、リラックスしてご自身の率直なご意見をご回答ください。
+        本アンケートは、本日のセッション・面接をより実りあるものにするため、事前に皆様の日常的なお考えや仕事観をお伺いするものです。正解・不正解はございませんので、リラックスしてご自身の率直なご意見をご回答ください。
     </div>
     """, unsafe_allow_html=True)
 
@@ -138,20 +135,9 @@ if not is_admin:
                 except Exception as e:
                     st.error(f"保存エラー: {e}")
 
-    # 注意事項ボックス（前日用と同一配置）
-    st.markdown("""
-    <div class="disclaimer-box">
-        <strong>⚠️ 注意事項・禁止事項・免責事項</strong><br>
-        <ul>
-            <li><strong>判定結果の位置付け:</strong> 本システムの分析は当日傾向分析であり、人物像を確定するものではありません。</li>
-            <li><strong>面接準備の補助ツール:</strong> 最終的な選考判定および合否決定の責任は選考責任者に帰属します。</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
 else:
-    # --- 管理者用画面（前日用と完全に同一レイアウト） ---
-    st.markdown('<div class="top-header">🟢 思考・表現力セッション（当日用 管理者画面）</div>', unsafe_allow_html=True)
+    # --- 管理者用画面 ---
+    st.markdown('<div class="top-header">🔴 思考・表現力セッション（管理者画面）</div>', unsafe_allow_html=True)
     
     st.success("管理者としてログイン中（パスワード認証成功）")
     if st.button("応募者画面へ戻る（ログアウト）"):
@@ -186,18 +172,7 @@ else:
                     st.markdown(row['ai_report'])
             else:
                 st.info("現在保存されているデータはありません。")
-        except Exception as e:
-            st.error(f"データ取得エラー: {e}")
+        except Exception as ec:
+            st.error(f"データ取得エラー: {ec}")
     else:
         st.warning("DB接続が確立されていません。")
-
-    # 注意事項ボックス
-    st.markdown("""
-    <div class="disclaimer-box">
-        <strong>⚠️ 注意事項・禁止事項・免責事項</strong><br>
-        <ul>
-            <li><strong>判定結果の位置付け:</strong> 本システムの分析は当日傾向分析であり、人物像を確定するものではありません。</li>
-            <li><strong>面接準備の補助ツール:</strong> 最終的な選考判定および合否決定の責任は選考責任者に帰属します。</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
