@@ -206,7 +206,7 @@ if not is_admin:
                 
                 if supabase:
                     try:
-                        supabase.table("mentality_applicants_matsuyama").insert(db_data).execute()
+                        supabase.table("candidate_responses").insert(db_data).execute()
                         st.success("回答を受け付けました。ご協力ありがとうございました。")
                     except Exception as e:
                         st.error(f"データベース保存エラー: {e}")
@@ -220,7 +220,7 @@ else:
 
     if supabase:
         try:
-            res = supabase.table("mentality_applicants_matsuyama").select("*").execute()
+            res = supabase.table("candidate_responses").select("*").execute()
             records = res.data
             
             if records:
@@ -302,14 +302,14 @@ else:
                     with btn_col1:
                         if st.button("評価メモをデータベースに保存する", type="primary"):
                             try:
-                                supabase.table("mentality_applicants_matsuyama").update({"ai_report": report_text}).eq("id", row["id"]).execute()
+                                supabase.table("candidate_responses").update({"ai_report": report_text}).eq("id", row["id"]).execute()
                                 st.success("レポートを更新保存しました")
                             except Exception as e:
                                 st.error(f"更新エラー: {e}")
                     with btn_col2:
                         if st.button("データを削除する"):
                             try:
-                                supabase.table("mentality_applicants_matsuyama").delete().eq("id", row["id"]).execute()
+                                supabase.table("candidate_responses").delete().eq("id", row["id"]).execute()
                                 st.warning("データを削除しました")
                                 st.rerun()
                             except Exception as e:
