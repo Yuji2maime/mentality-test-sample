@@ -6,9 +6,34 @@ import pandas as pd
 # ページ設定
 st.set_page_config(
     page_title="思考・表現力セッション（当日用）",
-    page_icon="📋",
+    page_icon="🔴",
     layout="wide"
 )
+
+# 視認性とトーンを整えるカスタムCSS（前日用レイアウトをベースに、ヘッダーを当日用の赤系グラデーションに統一）
+st.markdown("""
+<style>
+    .main-header {
+        background: linear-gradient(135deg, #9b2c2c 0%, #e53e3e 100%);
+        color: white;
+        padding: 18px 24px;
+        border-radius: 8px;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .disclaimer-box {
+        background-color: #ebf8ff;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #bee3f8;
+        font-size: 12px;
+        color: #2b6cb0;
+        line-height: 1.4;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Supabase接続情報の安全な読み込み
 try:
@@ -27,7 +52,7 @@ try:
 except Exception:
     AI_AVAILABLE = False
 
-# サイドバー：管理者ログインとメニュー（前日用と完全に同一の構成）
+# サイドバー：前日用と完全に同一の構成・デザイン
 st.sidebar.markdown("### メニュー・設定")
 st.sidebar.markdown("---")
 
@@ -43,9 +68,9 @@ st.sidebar.markdown("---")
 # 注意事項・禁止事項・免責事項（前日用と完全に同一のスタイル）
 st.sidebar.markdown("#### 注意事項・禁止事項・免責事項")
 st.sidebar.markdown("""
-<div style="background-color: #ebf8ff; padding: 12px; border-radius: 6px; border: 1px solid #bee3f8; font-size: 12px; color: #2b6cb0; line-height: 1.4;">
+<div class="disclaimer-box">
     <strong>判定結果の位置付け</strong><br>
-    本システムの分析は事前傾向分析であり、人物像を確定するものではありません。<br><br>
+    本システムの分析は当日傾向分析であり、人物像を確定するものではありません。<br><br>
     <strong>面接準備の補助ツール</strong><br>
     最終的な選考判定および合否決定の責任は選考責任者に帰属します。
 </div>
@@ -53,7 +78,9 @@ st.sidebar.markdown("""
 
 # メイン画面の切り替え
 if not is_admin:
-    # --- 受検者用フォーム ---
+    # --- 受検者用フォーム（前日用と完全同一のヘッダー帯を配置） ---
+    st.markdown('<div class="main-header">🔴 思考・表現力セッション</div>', unsafe_allow_html=True)
+    
     st.markdown("### 当日アンケート入力フォーム")
 
     st.markdown("""
@@ -119,7 +146,9 @@ if not is_admin:
                     st.error(f"保存エラー: {e}")
 
 else:
-    # --- 管理者用画面 ---
+    # --- 管理者用画面（前日用と完全同一レイアウト） ---
+    st.markdown('<div class="main-header">🔴 思考・表現力セッション（管理者画面）</div>', unsafe_allow_html=True)
+    
     st.success("管理者としてログイン中（パスワード認証成功）")
     if st.button("応募者画面へ戻る（ログアウト）"):
         st.rerun()
