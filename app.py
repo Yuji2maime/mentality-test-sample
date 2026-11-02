@@ -10,31 +10,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# 視認性とトーンを整えるカスタムCSS（当日用：赤系基調・画像と完全同一のレイアウト構造）
-st.markdown("""
-<style>
-    .top-header {
-        background: linear-gradient(135deg, #9b2c2c 0%, #e53e3e 100%);
-        color: white;
-        padding: 18px 24px;
-        border-radius: 8px;
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 25px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .disclaimer-sidebar {
-        background-color: #fff5f5;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #feb2b2;
-        font-size: 12px;
-        color: #742a2a;
-        line-height: 1.4;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Supabase接続情報の安全な読み込み
 try:
     SUPABASE_URL = st.secrets["SUPABASE_URL"].strip()
@@ -52,7 +27,7 @@ try:
 except Exception:
     AI_AVAILABLE = False
 
-# サイドバー：前日用と完全に同一の構造・配置
+# サイドバー：管理者ログインとメニュー（前日用と完全に同一の構成）
 st.sidebar.markdown("### メニュー・設定")
 st.sidebar.markdown("---")
 
@@ -65,12 +40,12 @@ is_admin = (admin_pass == "8888" and login_btn) or (admin_pass == "8888")
 
 st.sidebar.markdown("---")
 
-# 注意事項・禁止事項・免責事項（画像と同一のボックス配置）
+# 注意事項・禁止事項・免責事項（前日用と完全に同一のスタイル）
 st.sidebar.markdown("#### 注意事項・禁止事項・免責事項")
 st.sidebar.markdown("""
-<div class="disclaimer-sidebar">
+<div style="background-color: #ebf8ff; padding: 12px; border-radius: 6px; border: 1px solid #bee3f8; font-size: 12px; color: #2b6cb0; line-height: 1.4;">
     <strong>判定結果の位置付け</strong><br>
-    本システムの分析は当日傾向分析であり、人物像を確定するものではありません。<br><br>
+    本システムの分析は事前傾向分析であり、人物像を確定するものではありません。<br><br>
     <strong>面接準備の補助ツール</strong><br>
     最終的な選考判定および合否決定の責任は選考責任者に帰属します。
 </div>
@@ -79,8 +54,6 @@ st.sidebar.markdown("""
 # メイン画面の切り替え
 if not is_admin:
     # --- 受検者用フォーム ---
-    st.markdown('<div class="top-header">🔴 思考・表現力セッション</div>', unsafe_allow_html=True)
-    
     st.markdown("### 当日アンケート入力フォーム")
 
     st.markdown("""
@@ -118,7 +91,7 @@ if not is_admin:
 ・抽象的な表現の裏にある具体的な行動実績と論理的思考力を面接口頭で見極める。
 ■ 本日に使える深掘り質問例：
 1. 「ご自身の主張を裏付ける具体的なエピソードや、過去に直面した課題とその解決策を教えてください。」
-■ 面接準備メモ（面接官の事前メモ欄）：
+■ 面接事前準備メモ（面接官の事前メモ欄）：
 ・表面的な表現に終始しているため、面接にて実践力と論理性を厳しく追及すること。"""
 
                     data = {
@@ -147,8 +120,6 @@ if not is_admin:
 
 else:
     # --- 管理者用画面 ---
-    st.markdown('<div class="top-header">🔴 思考・表現力セッション（管理者画面）</div>', unsafe_allow_html=True)
-    
     st.success("管理者としてログイン中（パスワード認証成功）")
     if st.button("応募者画面へ戻る（ログアウト）"):
         st.rerun()
