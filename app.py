@@ -285,29 +285,29 @@ else:
                 c7.metric("Ne(発想)", f"{scores['Ne(発想)']}点")
                 c8.metric("Ni(洞察)", f"{scores['Ni(洞察)']}点")
 
-                    with col_right:
-                        st.markdown("#### 【思考・認知特性レーダーチャート】")
-                        categories = ['Te', 'Ti', 'Fe', 'Fi', 'Se', 'Si', 'Ne', 'Ni']
-                        values = [
-                            scores['Te(効率)'], scores['Ti(論理)'], scores['Fe(調和)'], scores['Fi(内省)'],
-                            scores['Se(実行)'], scores['Si(確実)'], scores['Ne(発想)'], scores['Ni(洞察)']
-                        ]
-                        
-                        fig = go.Figure()
-                        fig.add_trace(go.Scatterpolar(
-                            r=values + [values[0]],
-                            theta=categories + [categories[0]],
-                            fill='toself',
-                            name=row['name'],
-                            fillcolor='rgba(180, 40, 40, 0.4)',
-                            line=dict(color='#8B0000')
-                        ))
-                        fig.update_layout(
-                            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-                            showlegend=False,
-                            margin=dict(l=40, r=40, t=20, b=20)
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
+                with col_right:
+                    st.markdown("#### 【思考・認知特性レーダーチャート 】")
+                    categories = ['Te', 'Ti', 'Fe', 'Fi', 'Se', 'Si', 'Ne', 'Ni']
+                    values = [
+                        scores['Te(効率)'], scores['Ti(論理)'], scores['Fe(調和)'], scores['Fi(内省)'],
+                        scores['Se(実行)'], scores['Si(確実)'], scores['Ne(発想)'], scores['Ni(洞察)']
+                    ]
+
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatterpolar(
+                        r=values + [values[0]],
+                        theta=categories + [categories[0]],
+                        fill='toself',
+                        name=row['name'],
+                        fillcolor='rgba(180, 40, 40, 0.4)',
+                        line=dict(color='#B42828')
+                    ))
+                    fig.update_layout(
+                        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                        showlegend=False,
+                        margin=dict(l=40, r=40, t=20, b=20)
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
 
                     st.markdown("---")
                     st.markdown("### 📑 AI選考評価・採否＆適性配置・労務管理レポート")
@@ -335,9 +335,4 @@ else:
                             except Exception as e:
                                 st.error(f"削除エラー: {e}")
 
-            else:
-                st.info("現在、データベースに保存された回答データはありません。")
-        except Exception as e:
-            st.error(f"データ取得エラー: {e}")
-    else:
-        st.warning("Supabaseへの接続が確立されていません。")
+            
