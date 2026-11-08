@@ -273,17 +273,17 @@ else:
                         "Ni(洞察)": calc_scores.get("Ni", 18)
                     }
                         
-                        c1, c2, c3, c4 = st.columns(4)
-                        c1.metric("Te(効率)", f"{scores['Te(効率)']}点")
-                        c2.metric("Ti(論理)", f"{scores['Ti(論理)']}点")
-                        c3.metric("Fe(調和)", f"{scores['Fe(調和)']}点")
-                        c4.metric("Fi(内省)", f"{scores['Fi(内省)']}点")
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("Te(効率)", f"{scores['Te(効率)']}点")
+                c2.metric("Ti(論理)", f"{scores['Ti(論理)']}点")
+                c3.metric("Fe(調和)", f"{scores['Fe(調和)']}点")
+                c4.metric("Fi(内省)", f"{scores['Fi(内省)']}点")
                         
-                        c5, c6, c7, c8 = st.columns(4)
-                        c5.metric("Se(実行)", f"{scores['Se(実行)']}点")
-                        c6.metric("Si(確実)", f"{scores['Si(確実)']}点")
-                        c7.metric("Ne(発想)", f"{scores['Ne(発想)']}点")
-                        c8.metric("Ni(洞察)", f"{scores['Ni(洞察)']}点")
+                c5, c6, c7, c8 = st.columns(4)
+                c5.metric("Se(実行)", f"{scores['Se(実行)']}点")
+                c6.metric("Si(確実)", f"{scores['Si(確実)']}点")
+                c7.metric("Ne(発想)", f"{scores['Ne(発想)']}点")
+                c8.metric("Ni(洞察)", f"{scores['Ni(洞察)']}点")
 
                     with col_right:
                         st.markdown("#### 【思考・認知特性レーダーチャート】")
