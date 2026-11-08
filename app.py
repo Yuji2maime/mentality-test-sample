@@ -107,19 +107,24 @@ st.sidebar.warning(
 
 # 5. ヘルパー関数
 def calculate_scores(text):
-    length = len(text)
+    length = len(text) if text else 0
+    base_val = length % 10
+    
     scores = {
-        "Te": 25, "Ti": 15, "Fe": 10, "Fi": 15,
-        "Se": 10, "Si": 10, "Ne": 10, "Ni": 10
+        "Te": min(40, max(15, 20 + base_val * 2)),
+        "Ti": min(35, max(10, 15 + (length // 20) % 15)),
+        "Fe": min(30, max(10, 10 + (length // 30) % 10)),
+        "Fi": min(35, max(10, 15 + (length // 25) % 12)),
+        "Se": min(30, max(10, 10 + (length // 40) % 10)),
+        "Si": min(30, max(10, 12 + (length // 35) % 10)),
+        "Ne": min(35, max(10, 15 + (length // 15) % 15)),
+        "Ni": min(40, max(10, 18 + (length // 18) % 15))
     }
-    if length > 100:
-        scores["Te"] = min(35, 25 + (length // 50))
-        scores["Ti"] = min(30, 15 + (length // 60))
     return scores
 
 def analyze_text_simple(text):
     if not gemini_ready:
-        return get_default_law_day_report()
+            return get_default_law_day_report(text)
     
     prompt = f"""
 以下の応募者の記述内容を分析し、本日の面接・選考で活用できる労務・採用評価レポートを作成してください。
