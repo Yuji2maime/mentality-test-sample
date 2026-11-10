@@ -238,7 +238,7 @@ else:
         
         res = supabase.table("candidate_responses").select("*").execute()
         records = res.data
-            
+        selected_name = None    
         if records:
             df = pd.DataFrame(records)
             applicant_names = df["name"].tolist()
