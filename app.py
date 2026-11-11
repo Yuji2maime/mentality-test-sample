@@ -235,19 +235,32 @@ else:
     st.markdown("---")
 
     if supabase:
-        
         res = supabase.table("candidate_responses").select("*").execute()
         records = res.data
-        selected_name = None    
-        if records:
-            df = pd.DataFrame(records)
-            applicant_names = df["name"].tolist()
-                
-            selected_name = st.selectbox("評価・確認する応募者を選択してください", applicant_names)
-                
+        selected_name = None
+    if records:
+        df = pd.DataFrame(records)
+        applicant_names = df["name"].tolist()
+
+        selected_name = st.selectbox("評価・確認する応募者を選択してください", applicant_names)
+
         if selected_name:
-                row = df[df["name"] == selected_name].iloc[0]
-                    
+            row = df[df["name"] == selected_name].iloc[0]
+
+            col_left, col_right = st.columns([1, 1])
+
+            with col_left:
+                st.markdown(f"### 👤 応募者氏名: {row['name']}")
+                st.markdown("#### 【事前記述内容】")
+                st.info(row['content'])
+
+                st.markdown("#### 【判定タイプ＆認知特性スコア】")
+                st.write("判定タイプ / 認知特性: ['Te型 (効率・構造化)', '補助Ni (本質・洞察)']")
+
+                applicant_text = row.get('content', '')
+                calc_scores = calculate_scores(applicant_text)
+    else:
+        st.warning("現在、Supabaseに登録されている応募者データがありません。") 
                 col_left, col_right = st.columns([1, 1])
                     
                 with col_left:
