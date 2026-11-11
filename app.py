@@ -256,9 +256,7 @@ else:
 
                 st.markdown("#### 【判定タイプ＆認知特性スコア】")
                 st.write("判定タイプ / 認知特性: ['Te型 (効率・構造化)', '補助Ni (本質・洞察)']")
-
-                applicant_text = row.get('content', '')
-                calc_scores = calculate_scores(applicant_text)          
+     
             with col_left:
                 st.markdown(f"### 👤 応募者氏名: {row['name']}")
                 st.markdown("#### 【事前記述内容】")
@@ -267,9 +265,9 @@ else:
                 st.markdown("#### 【判定タイプ＆認知特性スコア】")
                 st.write('判定タイプ / 認知特性: ["Te型（効率・構造化）", "補助Ni（本質・洞察）"]')
                         
-                    # 応募者の記述内容（content）を基に、全8項目のスコアを動的に計算する
-                    applicant_text = row.get('content', '')
-                    calc_scores = calculate_scores(applicant_text)
+                # 応募者の記述内容（content）を基に、全8項目のスコアを動的に計算する
+                applicant_text = row.get('content', '')
+                calc_scores = calculate_scores(applicant_text)
 
                     scores = {
                         "Te(効率)": calc_scores.get("Te", 25),
