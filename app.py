@@ -269,16 +269,16 @@ else:
                 applicant_text = row.get('content', '')
                 calc_scores = calculate_scores(applicant_text)
 
-                    scores = {
-                        "Te(効率)": calc_scores.get("Te", 25),
-                        "Ti(論理)": calc_scores.get("Ti", 15),
-                        "Fe(調和)": calc_scores.get("Fe", 10),
-                        "Fi(内省)": calc_scores.get("Fi", 15),
-                        "Se(実行)": calc_scores.get("Se", 10),
-                        "Si(確実)": calc_scores.get("Si", 12),
-                        "Ne(発想)": calc_scores.get("Ne", 15),
-                        "Ni(洞察)": calc_scores.get("Ni", 18)
-                    }
+                scores = {
+                "Te(効率)": calc_scores.get("Te", 25),
+                "Ti(論理)": calc_scores.get("Ti", 15),
+                "Fe(調和)": calc_scores.get("Fe", 10),
+                "Fi(内省)": calc_scores.get("Fi", 15),
+                "Se(実行)": calc_scores.get("Se", 10),
+                "Si(確実)": calc_scores.get("Si", 12),
+                "Ne(発想)": calc_scores.get("Ne", 15),
+                "Ni(洞察)": calc_scores.get("Ni", 18)
+                }
                         
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("Te(効率)", f"{scores['Te(効率)']}点")
